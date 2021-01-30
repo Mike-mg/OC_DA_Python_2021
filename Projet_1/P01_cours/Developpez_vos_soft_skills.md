@@ -102,10 +102,30 @@
   * Prendre des responsabilité
   * Respecter ses valeurs et celles de l'organisation
 ***
-### 11)
+### 11) Définissez votre objectif
+* Definir un objectif SMART (un objectif spécifique, mesurable, ambitieux, réaliste, temporel) 
+* Connaitre le projet 
+* Identifier les softs skills à utiliser pour atteindre le ou les objectif(s) 
+* Savoir le délai et le degré d'exigence des connaissances total de l'objectif
+* Etre en correlation avec son objectif
 ***
-### 12)
+### 12) Projetez-vous dans cette montée en compétences
+* La visualisation permets au cerveau de préparer son objectif
+* Le mind-mapping est recommandé, pensée autour de l'objectif
+* Faire le point sur la météo émotionnelle, pensée négative(parasite) ou positive   
+* Effacer les pensées parasites par des parades afin de se positionner sur une posture optimiste
 ***
-### 13)
+### 13) Passez à l’action
+* Procéder pas à pas (Un objectif d'un pas par jour), non ambitieux
+* Utiliser la méthode "faire comme si", se mettre dans la peau de quelqu'un qui a réussit le même projet que vous
+* Le buddy system (l'entre-aide commun et avancer ensemble)
+***
+### 14) Faites le point sur vos soft skills
+* Les soft skills sont des compétences profondément humaines
+* Il y a trois grandes catégories
+  * La capacité d'adaptation
+  * Compétences sociales
+  * La résolution des problèmes
+* Faire le point régulièrement sur vos soft skills est un excellent moyen de progresser
 ***
 

@@ -101,7 +101,6 @@
   * Etre proactif (anticiper les attentes)
   * Prendre des responsabilité
   * Respecter ses valeurs et celles de l'organisation
-  *
 ***
 ### 11)
 ***

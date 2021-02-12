@@ -3,22 +3,22 @@
 
 
 # ===============================================
-
 import requests
 from bs4 import BeautifulSoup as bs
 import csv
 import os
 import urllib.request
-
 # ===============================================
-
 address_site = "http://books.toscrape.com/"
 dossier = "/home/mike/OC_DA_Python/Projet_2/Books_to_Scrape_Images/"
-
 # ===============================================
 
 
 def category_link():
+    """
+     search all categories
+    """
+    print("function : category_link > In progress ")
 
     links = []
     r_url = requests.get(address_site + 'catalogue/category/books_1/index.html')
@@ -29,79 +29,52 @@ def category_link():
             link_category = address_site + "catalogue/category/" + category('a')[0]['href'][3:]
             links.append(link_category)
 
-
-    print('category_link fini')
+    print("function : category_link > Finished ")
     return links
-
 
 # ===============================================
 
 
-def create_folders_and_pics_by_category(param):
+def nb_page_by_category(param):
     """
-        > [1] Create folder by category
-        > [2] nb page by category
-        > [3] Saving images each category
+    search the number of pages by category
     """
+    print("function : nb_page_by_category > In progress ")
 
-    list_category = param
+    list_by_page = []
 
-    for list in list_category:
+    for x in param:
 
-        list_by_page = [list]
-        page = requests.get(list)
-        page_article = bs(page.text, 'html.parser')
+        url_page = x[0:-10]
+        list_by_page.append(x)
 
-        # [1]
-        for link in page_article.find_all('div',class_='page-header action'):
-            category = link('h1')[0].text
-            if not os.path.exists(f"{dossier}{category}"):
-                os.mkdir(f"{dossier}{category}")
+        page = requests.get(x)
+        bs_page = bs(page.text, 'html.parser')
 
-        # [2]
-        url_page = list[0:-10]
-        while page_article.find_all('li', class_='next'):
+        while bs_page.find_all('li', class_='next'):
+            index_page = bs_page.find_all('li', class_='next')[0]('a')[0]['href']
+            url_next_page = url_page + index_page
 
-            for all_page in page_article.find_all('li', class_='next'):
+            list_by_page.append(url_next_page)
 
-                num_page = all_page('a')[0]['href']
-                next_page = url_page + num_page
+            npage_next = requests.get(url_next_page)
+            bs_page = bs(npage_next.text, 'html.parser')
 
-                page = requests.get(next_page)
-                page_article = bs(page.text, 'html.parser')
-
-                list_by_page.append(next_page)
-
-        # [3]
-        for book_image_folder in list_by_page:
-            page = requests.get(book_image_folder)
-            page_article = bs(page.text, 'html.parser')
-
-            for link in page_article.find_all('div', class_='image_container'):
-                link_img = address_site + link('a')[0]('img')[0]['src'][12:]
-                image = f"{dossier}{category}{link_img[43:]}"
-
-                if os.path.isfile(f"{dossier}{category}{link_img[43:]}"):
-                    pass
-                    # print(f"The file already has been saved : {image}")
-                else:
-                    urllib.request.urlretrieve(link_img, image)
-                    # print(f" Image for downloading : {image}")
-
-    print('create_folders_and_pics_by_category fini')
+    print("function : nb_page_by_category > Finished ")
     return list_by_page
-
 
 # ===============================================
 
 
 def book_info(param):
-
-    book_url = param
+    """
+    infos by book
+    """
+    print("function : book_info > In progress ")
 
     infos_articles = []
 
-    for x in book_url:
+    for x in param:
 
         page = requests.get(x)
         article = bs(page.text, 'html.parser')
@@ -128,43 +101,96 @@ def book_info(param):
             for info in page_article.find_all('div', class_='content'):
                 review_rating = info.find('p', class_='star-rating')['class'][1]
 
-                info_article.append(product_page_url)
-                info_article.append(upc)
-                info_article.append(titre)
-                info_article.append(price_including_tax)
-                info_article.append(price_excluding_tax)
-                info_article.append(number_available)
-                info_article.append(product_description)
-                info_article.append(categorie)
-                info_article.append(review_rating)
-                info_article.append(url_image)
-
+            info_article.append(product_page_url)
+            info_article.append(upc)
+            info_article.append(titre)
+            info_article.append(price_including_tax)
+            info_article.append(price_excluding_tax)
+            info_article.append(number_available)
+            info_article.append(product_description)
+            info_article.append(categorie)
+            info_article.append(review_rating)
+            info_article.append(url_image)
 
             infos_articles.append(info_article)
 
-    print('book_info fini')
+    print("function : book_info > Finished ")
     return infos_articles
-
 
 # ===============================================
 
 
-def donnees_sauvegardees(info_article):
+def create_folders_and_pics_by_category(category):
+    """
+        > [1] Create folder by category
+        > [3] Saving images each category
+    """
+    print("function : create_folders_and_pics_by_category > In progress ")
+
+    for x in category:
+
+        page = requests.get(x)
+        page_article = bs(page.text, 'html.parser')
+
+        # [1]
+        for link in page_article.find_all('div', class_='page-header action'):
+            link_category = link('h1')[0].text
+
+            if os.path.exists(f"{dossier}{link_category}"):
+                pass
+                print(f'The folder exist : {dossier}{link_category}')
+            else:
+                os.mkdir(f"{dossier}{link_category}")
+
+            for y in nb_page_by_category([x]):
+
+                page = requests.get(y)
+                bs_page = bs(page.text, 'html.parser')
+
+                for x in bs_page.find_all('div', class_='image_container'):
+                    image_name = x('a')[0]('img')[0]['src'][-36:]
+                    url_image = address_site + x('a')[0]('img')[0]['src'][12:]
+                    print(url_image)
+                    file_path = f"{dossier}{link_category}/{image_name}"
+                    print(file_path)
+
+                    if os.path.isfile(f"{dossier}{link_category}/{image_name}"):
+                        print(f"The file already has been saved : {image_name}")
+                        pass
+                    else:
+                        urllib.request.urlretrieve(url_image, file_path)
+                        print(f" Image for downloading : {image_name}")
+
+    print("function : create_folders_and_pics_by_category > Finished ")
+
+# ===============================================
+
+
+def backup_data(info_book):
+    """
+
+    """
+    print("function : backup_data > In progress ")
+
     with open('article.csv', 'w', newline='\n') as f:
 
         article_csv = csv.writer(f)
         article_csv.writerow(['Product_page_url', 'Upc', 'Titre', 'Price_including_tax', 'Price_excluding_tax',
                               'Number_available', 'Product_description', 'Category', 'Review_rating', 'Image_url'])
 
-        for x in info_article:
+        for x in info_book:
             article_csv.writerow(x)
 
+    print("function : backup_data > Finished ")
 
 # ===============================================
 
 
 def main():
-
+    create_folders_and_pics_by_category(category_link())
+    all_pages = nb_page_by_category(category_link())
+    infos_books = book_info(all_pages)
+    backup_data(infos_books)
 
 if __name__ == "__main__":
     main()

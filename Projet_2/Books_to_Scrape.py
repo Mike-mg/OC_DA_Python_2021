@@ -3,14 +3,37 @@
 
 
 # ===============================================
+
 import requests
 from bs4 import BeautifulSoup as bs
 import csv
 import os
 import urllib.request
+
 # ===============================================
+
 address_site = "http://books.toscrape.com/"
 dossier = "/home/mike/OC_DA_Python/Projet_2/Books_to_Scrape_Images/"
+
+# ===============================================
+
+
+def title_category():
+    """
+    Search all category titles
+    """
+
+    title_category = []
+    r_url = requests.get(address_site + 'catalogue/category/books_1/index.html')
+    bs_page = bs(r_url.text, 'html.parser')
+
+    for list_link in bs_page.find('ul', class_='nav-list')('ul'):
+        for category in list_link.find_all('li'):
+            title_category.append(category('a')[0].text.strip())
+
+    print("> Function : title_category > Finished ")
+    return title_category
+
 # ===============================================
 
 
@@ -18,7 +41,6 @@ def category_link():
     """
      search all categories
     """
-    print("function : category_link > In progress ")
 
     links = []
     r_url = requests.get(address_site + 'catalogue/category/books_1/index.html')
@@ -29,7 +51,7 @@ def category_link():
             link_category = address_site + "catalogue/category/" + category('a')[0]['href'][3:]
             links.append(link_category)
 
-    print("function : category_link > Finished ")
+    print("> Function : category_link > Finished ")
     return links
 
 # ===============================================
@@ -39,7 +61,6 @@ def nb_page_by_category(param):
     """
     search the number of pages by category
     """
-    print("function : nb_page_by_category > In progress ")
 
     list_by_page = []
 
@@ -60,7 +81,7 @@ def nb_page_by_category(param):
             npage_next = requests.get(url_next_page)
             bs_page = bs(npage_next.text, 'html.parser')
 
-    print("function : nb_page_by_category > Finished ")
+    print("> Function : nb_page_by_category > Finished ")
     return list_by_page
 
 # ===============================================
@@ -70,7 +91,6 @@ def book_info(param):
     """
     infos by book
     """
-    print("function : book_info > In progress ")
 
     infos_articles = []
 
@@ -114,7 +134,7 @@ def book_info(param):
 
             infos_articles.append(info_article)
 
-    print("function : book_info > Finished ")
+    print("> Function : book_info > Finished ")
     return infos_articles
 
 # ===============================================
@@ -122,10 +142,8 @@ def book_info(param):
 
 def create_folders_and_pics_by_category(category):
     """
-        > [1] Create folder by category
-        > [3] Saving images each category
+
     """
-    print("function : create_folders_and_pics_by_category > In progress ")
 
     for x in category:
 
@@ -136,9 +154,13 @@ def create_folders_and_pics_by_category(category):
         for link in page_article.find_all('div', class_='page-header action'):
             link_category = link('h1')[0].text
 
+            print('\n===========================================================')
+            print(f'Downloading of Images and creation of the category folder : {link_category}')
+            print('---------------------')
+
             if os.path.exists(f"{dossier}{link_category}"):
                 pass
-                print(f'The folder exist : {dossier}{link_category}')
+                print(f'> The folder exist : {dossier}{link_category}')
             else:
                 os.mkdir(f"{dossier}{link_category}")
 
@@ -150,18 +172,19 @@ def create_folders_and_pics_by_category(category):
                 for x in bs_page.find_all('div', class_='image_container'):
                     image_name = x('a')[0]('img')[0]['src'][-36:]
                     url_image = address_site + x('a')[0]('img')[0]['src'][12:]
-                    print(url_image)
+                    print(f"> Url image : {url_image}")
                     file_path = f"{dossier}{link_category}/{image_name}"
-                    print(file_path)
+                    print(f"> Path : {file_path}")
 
                     if os.path.isfile(f"{dossier}{link_category}/{image_name}"):
-                        print(f"The file already has been saved : {image_name}")
-                        pass
+                        print(f"> The file already has been saved : {image_name}")
+                        print()
+
                     else:
                         urllib.request.urlretrieve(url_image, file_path)
-                        print(f" Image for downloading : {image_name}")
+                        print(f"> Image for downloading : {image_name}")
 
-    print("function : create_folders_and_pics_by_category > Finished ")
+    print("> Function : create_folders_and_pics_by_category > Finished ")
 
 # ===============================================
 
@@ -170,27 +193,72 @@ def backup_data(info_book):
     """
 
     """
-    print("function : backup_data > In progress ")
 
-    with open('article.csv', 'w', newline='\n') as f:
+    print('===========================================')
+    choice_name_file = input('> Enter the filename : ')
+    print('===========================================')
 
-        article_csv = csv.writer(f)
-        article_csv.writerow(['Product_page_url', 'Upc', 'Titre', 'Price_including_tax', 'Price_excluding_tax',
-                              'Number_available', 'Product_description', 'Category', 'Review_rating', 'Image_url'])
+    with open(f'{choice_name_file}.csv', 'w', newline='\n') as f:
+
+        file_csv = csv.writer(f)
+        file_csv.writerow(['Product_page_url', 'Upc', 'Titre', 'Price_including_tax', 'Price_excluding_tax',
+                           'Number_available', 'Product_description', 'Category', 'Review_rating', 'Image_url'])
 
         for x in info_book:
-            article_csv.writerow(x)
+            file_csv.writerow(x)
 
-    print("function : backup_data > Finished ")
+    print("> Function : backup_data > Finished ")
+    print('Finnish')
 
 # ===============================================
 
 
 def main():
-    create_folders_and_pics_by_category(category_link())
-    all_pages = nb_page_by_category(category_link())
-    infos_books = book_info(all_pages)
-    backup_data(infos_books)
+
+    while True:
+
+        for k, v in enumerate(title_category()):
+            print(k, v)
+
+        print("50 All categories")
+
+        print('\n===============================')
+        choice = input('Select a category [ 0 to 50 ] : ')
+        print('---------------------')
+
+        try:
+            choice = int(choice)
+
+        except TypeError:
+            os.system('clear')
+            continue
+
+        except ValueError:
+            os.system('clear')
+            continue
+
+        if choice >= 0 and choice <= 49:
+
+            titre = title_category()[choice].lower()
+
+            for i in category_link():
+                if titre in i:
+                    create_folders_and_pics_by_category([category_link()[choice]])
+                    all_pages = nb_page_by_category([i])
+                    infos_books = book_info(all_pages)
+                    backup_data(infos_books)
+
+        elif choice == 50:
+            create_folders_and_pics_by_category(category_link())
+            all_pages = nb_page_by_category(category_link())
+            infos_books = book_info(all_pages)
+            backup_data(infos_books)
+
+        else:
+            continue
+
+        return False
+
 
 if __name__ == "__main__":
     main()

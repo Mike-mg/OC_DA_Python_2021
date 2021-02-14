@@ -30,7 +30,6 @@ def title_category():
     for list_link in bs_page.find('ul', class_='nav-list')('ul')[0]('li'):
         title_category.append(list_link.find('a').text.strip())
 
-    print("> Function : title_category > Finished ")
     return sorted(title_category)
 
 # ===============================================
@@ -45,11 +44,10 @@ def category_link():
     r_url = requests.get(address_site + 'catalogue/category/books_1/index.html')
     bs_page = bs(r_url.text, 'html.parser')
 
-    for list_link in bs_page.find_all('ul', class_='nav-list')[0]('li'):
-        links.append(address_site + "catalogue/category/" + list_link.find('a')['href'][3:])
+    for list_link in bs_page.find_all('ul', class_='nav-list')[0]('ul')[0]('li'):
+        links.append(address_site + "catalogue/category/" + list_link('a')[0]['href'][3:])
 
-    print("> Function : category_link > Finished ")
-    return links
+    return sorted(links)
 
 # ===============================================
 
@@ -77,7 +75,6 @@ def nb_page_by_category(param):
             npage_next = requests.get(url_next_page)
             bs_page = bs(npage_next.text, 'html.parser')
 
-    print("> Function : nb_page_by_category > Finished ")
     return list_by_page
 
 # ===============================================
@@ -112,7 +109,7 @@ def book_info(param):
                 url_image = address_site + info.find_all('img')[0]['src'][6:]
 
             for info in page_article.find_all('ul', class_='breadcrumb'):
-                categorie = info.find_all('li')[2].text.strip()
+                category = info.find_all('li')[2].text.strip()
 
             for info in page_article.find_all('div', class_='content'):
                 review_rating = info.find('p', class_='star-rating')['class'][1]
@@ -124,13 +121,12 @@ def book_info(param):
             info_article.append(price_excluding_tax)
             info_article.append(number_available)
             info_article.append(product_description)
-            info_article.append(categorie)
+            info_article.append(category)
             info_article.append(review_rating)
             info_article.append(url_image)
 
             infos_articles.append(info_article)
 
-    print("> Function : book_info > Finished ")
     return infos_articles
 
 # ===============================================
@@ -149,15 +145,17 @@ def create_folders_and_pics_by_category(category):
         for link in page_article.find_all('div', class_='page-header action'):
             link_category = link('h1')[0].text
 
-            print('\n===========================================================')
+            print('\n-----------------------------------------------------------')
             print(f'Downloading of Images and creation of the category folder : {link_category}')
-            print('---------------------')
+            print('-----------------------------------------------------------\n')
 
-            if os.path.exists(f"{dossier}{link_category}"):
+            if os.path.exists(f'{dossier}{link_category}'):
                 pass
-                print(f'> The folder exist : {dossier}{link_category}')
+                print(f'> The folder exist : {dossier}{link_category}\n')
+
             else:
                 os.mkdir(f"{dossier}{link_category}")
+                print(f'> The folder has been created : {dossier}{link_category}')
 
             for y in nb_page_by_category([x]):
 
@@ -167,43 +165,36 @@ def create_folders_and_pics_by_category(category):
                 for x in bs_page.find_all('div', class_='image_container'):
                     image_name = x('a')[0]('img')[0]['src'][-36:]
                     url_image = address_site + x('a')[0]('img')[0]['src'][12:]
-                    print(f"> Url image : {url_image}")
+                    print(f"\n> Url image : {url_image}")
                     file_path = f"{dossier}{link_category}/{image_name}"
                     print(f"> Path : {file_path}")
 
                     if os.path.isfile(f"{dossier}{link_category}/{image_name}"):
                         print(f"> The file already has been saved : {image_name}")
-                        print()
+                        print('\n')
 
                     else:
                         urllib.request.urlretrieve(url_image, file_path)
                         print(f"> Image for downloading : {image_name}")
-
-    print("> Function : create_folders_and_pics_by_category > Finished ")
+                        print('\n')
 
 # ===============================================
 
 
-def backup_data(info_book):
+def backup_data(info_book, filename):
     """
-    Saves the information of the items in the selected categories
+    Saves information and books in the selected categories
     """
 
-    print('===========================================')
-    choice_name_file = input('> Enter the filename : ')
-    print('===========================================')
-
-    with open(f'{choice_name_file}.csv', 'w', newline='\n') as f:
+    with open(f'{filename}.csv', 'w', newline='\n') as f:
 
         file_csv = csv.writer(f)
-        file_csv.writerow(['Product_page_url', 'Upc', 'Titre', 'Price_including_tax', 'Price_excluding_tax',
-                           'Number_available', 'Product_description', 'Category', 'Review_rating', 'Image_url'])
+        file_csv.writerow(['Product_page_url', 'Upc', 'Titre', 'Price_including_tax',
+                           'Price_excluding_tax', 'Number_available', 'Product_description',
+                           'Category', 'Review_rating', 'Image_url'])
 
         for x in info_book:
             file_csv.writerow(x)
-
-    print("> Function : backup_data > Finished ")
-    print('Finnish')
 
 # ===============================================
 
@@ -213,13 +204,17 @@ def main():
     while True:
 
         for k, v in enumerate(title_category()):
-            print(k, v)
+            print(f" N°{k} : {v}")
 
-        print("50 All categories")
+        print('\n+ Others options --------------------------------------------')
+        print(f" N°{k + 1} : All categories by book (separate image folders)")
+        print(f" N°{k + 2} : All categories in one file (separate image folders)")
+        print('------------------------------------------------------------')
 
-        print('\n===============================')
-        choice = input('Select a category [ 0 to 50 ] : ')
-        print('---------------------')
+
+        print('\n--------------------------------------------')
+        choice = input('Select a category or option of [ 0 to 51 ] : ')
+        print('--------------------------------------------')
 
         try:
             choice = int(choice)
@@ -233,21 +228,26 @@ def main():
             continue
 
         if choice >= 0 and choice <= 49:
-
-            titre = title_category()[choice].lower()
-
-            for i in category_link():
-                if titre in i:
-                    create_folders_and_pics_by_category([category_link()[choice]])
-                    all_pages = nb_page_by_category([i])
-                    infos_books = book_info(all_pages)
-                    backup_data(infos_books)
+            all_pages = nb_page_by_category([category_link()[choice]])
+            infos_books = book_info(all_pages)
+            backup_data(infos_books, title_category()[choice])
+            create_folders_and_pics_by_category([category_link()[choice]])
 
         elif choice == 50:
-            create_folders_and_pics_by_category(category_link())
-            all_pages = nb_page_by_category(category_link())
+            i = 0
+            for x in category_link()[0:2]:
+                all_pages = nb_page_by_category([x])
+                infos_books = book_info(all_pages)
+                backup_data(infos_books, title_category()[i])
+                create_folders_and_pics_by_category([x])
+                i += 1
+
+        elif choice == 51:
+            category = category_link()[0:2]
+            all_pages = nb_page_by_category(category)
             infos_books = book_info(all_pages)
-            backup_data(infos_books)
+            backup_data(infos_books, 'all categories')
+            create_folders_and_pics_by_category(category)
 
         else:
             continue
@@ -255,6 +255,7 @@ def main():
         return False
 
 # ===============================================
+
 
 if __name__ == "__main__":
     main()

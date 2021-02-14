@@ -27,12 +27,11 @@ def title_category():
     r_url = requests.get(address_site + 'catalogue/category/books_1/index.html')
     bs_page = bs(r_url.text, 'html.parser')
 
-    for list_link in bs_page.find('ul', class_='nav-list')('ul'):
-        for category in list_link.find_all('li'):
-            title_category.append(category('a')[0].text.strip())
+    for list_link in bs_page.find('ul', class_='nav-list')('ul')[0]('li'):
+        title_category.append(list_link.find('a').text.strip())
 
     print("> Function : title_category > Finished ")
-    return title_category
+    return sorted(title_category)
 
 # ===============================================
 
@@ -46,10 +45,8 @@ def category_link():
     r_url = requests.get(address_site + 'catalogue/category/books_1/index.html')
     bs_page = bs(r_url.text, 'html.parser')
 
-    for list_link in bs_page.find('ul', class_='nav-list')('ul'):
-        for category in list_link.find_all('li'):
-            link_category = address_site + "catalogue/category/" + category('a')[0]['href'][3:]
-            links.append(link_category)
+    for list_link in bs_page.find_all('ul', class_='nav-list')[0]('li'):
+        links.append(address_site + "catalogue/category/" + list_link.find('a')['href'][3:])
 
     print("> Function : category_link > Finished ")
     return links
@@ -73,9 +70,8 @@ def nb_page_by_category(param):
         bs_page = bs(page.text, 'html.parser')
 
         while bs_page.find_all('li', class_='next'):
-            index_page = bs_page.find_all('li', class_='next')[0]('a')[0]['href']
-            url_next_page = url_page + index_page
 
+            url_next_page = url_page + bs_page.find_all('li', class_='next')[0]('a')[0]['href']
             list_by_page.append(url_next_page)
 
             npage_next = requests.get(url_next_page)
@@ -142,7 +138,7 @@ def book_info(param):
 
 def create_folders_and_pics_by_category(category):
     """
-
+    Folder creation by category and image downloads
     """
 
     for x in category:
@@ -150,7 +146,6 @@ def create_folders_and_pics_by_category(category):
         page = requests.get(x)
         page_article = bs(page.text, 'html.parser')
 
-        # [1]
         for link in page_article.find_all('div', class_='page-header action'):
             link_category = link('h1')[0].text
 
@@ -191,7 +186,7 @@ def create_folders_and_pics_by_category(category):
 
 def backup_data(info_book):
     """
-
+    Saves the information of the items in the selected categories
     """
 
     print('===========================================')
@@ -259,6 +254,7 @@ def main():
 
         return False
 
+# ===============================================
 
 if __name__ == "__main__":
     main()

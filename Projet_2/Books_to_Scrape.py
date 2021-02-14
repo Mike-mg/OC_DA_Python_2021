@@ -162,9 +162,9 @@ def create_folders_and_pics_by_category(category):
                 page = requests.get(y)
                 bs_page = bs(page.text, 'html.parser')
 
-                for x in bs_page.find_all('div', class_='image_container'):
-                    image_name = x('a')[0]('img')[0]['src'][-36:]
-                    url_image = address_site + x('a')[0]('img')[0]['src'][12:]
+                for z in bs_page.find_all('div', class_='image_container'):
+                    image_name = z('a')[0]('img')[0]['src'][-36:]
+                    url_image = address_site + z('a')[0]('img')[0]['src'][12:]
                     print(f"\n> Url image : {url_image}")
                     file_path = f"{dossier}{link_category}/{image_name}"
                     print(f"> Path : {file_path}")
@@ -211,7 +211,6 @@ def main():
         print(f" N°{k + 2} : All categories in one file (separate image folders)")
         print('------------------------------------------------------------')
 
-
         print('\n--------------------------------------------')
         choice = input('Select a category or option of [ 0 to 51 ] : ')
         print('--------------------------------------------')
@@ -235,7 +234,7 @@ def main():
 
         elif choice == 50:
             i = 0
-            for x in category_link()[0:2]:
+            for x in category_link():
                 all_pages = nb_page_by_category([x])
                 infos_books = book_info(all_pages)
                 backup_data(infos_books, title_category()[i])
@@ -243,7 +242,7 @@ def main():
                 i += 1
 
         elif choice == 51:
-            category = category_link()[0:2]
+            category = category_link()
             all_pages = nb_page_by_category(category)
             infos_books = book_info(all_pages)
             backup_data(infos_books, 'all categories')
